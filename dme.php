@@ -1,8 +1,8 @@
 <?php
 
-$dsn = 'mysql:dbname=mda39;host=127.0.0.1';
-$user = 'mda39';
-$password = 'pLkQe1oR';
+$dsn = 'mysql:dbname=fitzscos;host=127.0.0.1';
+$user = 'fitzscos';
+$password = 'Eitaeyae';
 
 $dbh = new PDO($dsn, $user, $password);
 $dbh -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -69,7 +69,7 @@ else
 <div id="container">
 	<div id="header">
 		<h1>
-			<img src="phonebook/images/fitz-crest.png" id="logo" />
+			<img src="images/fitz-crest.png" id="logo" />
 			Fitz SCO Printer Monitoring
 		</h1>
 	</div>

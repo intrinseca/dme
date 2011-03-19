@@ -1,0 +1,143 @@
+body
+{
+  font-family: calibri;
+  background: url('images/bk.png') repeat-x #E7E7E9;
+  font-size: 10pt;
+	padding: 0;
+	margin: 0;
+}
+
+h1, h2
+{
+  font-family: perpetua, serif;
+  text-transform: uppercase;
+  font-weight: normal;
+	margin-bottom: 0.1em;
+}
+
+a
+{
+  text-decoration: none;
+}
+
+a:hover
+{
+  text-decoration: underline;
+}
+
+a img
+{
+  border: 0;
+}
+
+td
+{
+  font-size: 10.2pt;
+}
+
+#container
+{
+  max-width: 890px;
+	width:100%;
+  margin: 10px auto;
+  background-color: #fff;
+}
+
+#logo
+{
+  float: left;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+#header
+{
+	padding: 10px;
+}
+
+#header h1
+{
+  display: inline;
+}
+
+.error
+{
+  background: #770D28;
+  color: #fff;
+  font-family: corbel;
+	width: 100%;
+	font-size: 1.4em;
+}
+
+.error div
+{
+	margin: 10px;
+}
+
+#indexBar a
+{
+	color: white;
+}
+
+#sortLinks
+{
+  text-align: right;
+}
+
+a.activeSort
+{
+  font-weight: bold;
+}
+
+#indexLinks a
+{
+	text-decoration: none;
+  margin-right: 0.5em;
+  font-size: 12pt;
+}
+
+#content
+{
+	margin: 10px;
+	padding: 10px 0;
+}
+
+#content table
+{
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#content table td
+{
+	padding: 0.5em;
+}
+
+#content table th
+{
+  border-bottom: 1px solid #770D28;
+  font-family: corbel, serif;
+  font-size: 1.1em;
+  font-weight: bold;
+  text-align: left;
+  padding-top: 0.5em;
+  padding-left: 0.25em;
+}
+
+#content table tr.even
+{
+	background: #ddd;
+}
+
+#content table tr.clear td
+{
+	text-decoration: line-through;
+}
+
+#footer
+{
+  font-size: 0.8em;
+  color: #939598;
+  text-align: center;
+  margin-top: 2em;
+}
