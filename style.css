@@ -15,6 +15,11 @@ h1, h2
 	margin-bottom: 0.1em;
 }
 
+#content h1, #content h2
+{
+  border-bottom: 1px solid #770D28;
+}
+
 a
 {
   text-decoration: none;
@@ -106,6 +111,7 @@ a.activeSort
 {
   width: 100%;
   border-collapse: collapse;
+	margin-top: 5px;
 }
 
 #content table td
@@ -115,13 +121,16 @@ a.activeSort
 
 #content table th
 {
-  border-bottom: 1px solid #770D28;
-  font-family: corbel, serif;
-  font-size: 1.1em;
+  font-family: corbel, sans-serif;
+  font-size: 1em;
   font-weight: bold;
   text-align: left;
-  padding-top: 0.5em;
   padding-left: 0.25em;
+}
+
+#content table thead th
+{
+  border-bottom: 1px solid #770D28;
 }
 
 #content table tr.even
@@ -132,6 +141,16 @@ a.activeSort
 #content table tr.clear td
 {
 	text-decoration: line-through;
+}
+
+#content #status
+{
+	width: auto;
+}
+
+#status td img
+{
+	vertical-align: text-top;
 }
 
 #footer

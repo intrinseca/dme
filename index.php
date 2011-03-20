@@ -15,7 +15,7 @@ if(isset($_GET['clear']))
 {
 	$query = $dbh -> prepare('UPDATE dme_messages SET status=2 WHERE id=?');
 	$query -> execute (array($_GET['clear']));
-	header("Location: dme.php");
+	header("Location: index.php");
 }
 
 if(isset($_GET['assign']))
@@ -25,11 +25,11 @@ if(isset($_GET['assign']))
 
 	if($query -> rowCount > 0)
 	{
-		header("Location: dme.php?count={$query -> rowCount}");
+		header("Location: index.php?count={$query -> rowCount}");
 	}
 	else
 	{
-		header("Location: dme.php?error=Already%20Assigned&count={$query -> rowCount}");
+		header("Location: index.php?error=Already%20Assigned&count={$query -> rowCount}");
 	}
 }
 
@@ -39,7 +39,23 @@ $alerts = $query -> fetchAll();
 
 $printers = array('Copier_LIB_BMT', 'Copier_LIB_1ST', 'Copier_LIB_2ND');
 
-$query = $dbh -> prepare('SELECT printer, MIN(status) AS status FROM dme_messages GROUP BY printer');
+$query = $dbh -> prepare(<<<sql
+SELECT name, description, minstatus, faults
+FROM (
+	SELECT 
+		printer, 
+		MIN(status) AS minstatus, 
+		GROUP_CONCAT(
+			DISTINCT fault 
+			ORDER BY time DESC
+			SEPARATOR ", "
+			) AS faults
+	FROM dme_messages
+	WHERE status!=2
+	GROUP BY printer) AS statustable
+RIGHT JOIN dme_printers ON statustable.printer=name
+sql
+);
 $query -> execute();
 $status = $query -> fetchAll();
 ?>
@@ -49,6 +65,7 @@ $status = $query -> fetchAll();
 	<title>Fitz SCO Printer Monitoring</title>
 	<link rel="stylesheet" href="style.css" />
   <meta name="viewport" content="width=320" />
+	<link rel="shortcut icon" href="images/favicon.png" />
 </head>
 <body>
 
@@ -71,29 +88,67 @@ html;
 			}
 		?>
 
-		<table>
-			<tr>
-				<?php
-					foreach($status as $printer)
+		<h2>Status</h2>
+		
+		<table id="status">
+			<?php
+				foreach($status as $printer)
+				{
+					if(is_null($printer['minstatus']))
 					{
-						$online = ($printer['status'] == 2)?"Online":"Fault";
-						echo <<<html
-<td>
-{$printer['printer']}: {$online}
-</td>
-html;
+						$faultDesc = "Online";
+						$image = "printer.png";
 					}
-				?>
-			</tr>
+					else
+					{
+						$faultDesc = "Offline: " . $printer['faults'];
+						
+						$faultLength = strpos($printer['faults'], ',');
+						if($faultLength === false)
+							$faultLength = strlen($printer['faults']);
+						
+						switch(substr($printer['faults'], 0, $faultLength))
+						{
+							case "Paper out":
+								$image = "printer_empty.png";
+								break;
+							case "Toner out":
+								$image = "printer_color.png";
+								break;
+							case "Down":
+								$image = "printer_delete.png";
+								break;
+							default:
+								$image = "printer_error.png";
+								break;
+						}
+					}			
+					
+					echo <<<html
+<tr>
+	<th>
+		{$printer['description']}
+	</th>
+	<td>
+		<img src="images/{$image}" /> {$faultDesc}
+	</td>
+</tr>
+html;
+				}
+			?>
 		</table>
 
+		<h2>Log</h2>
+		
 		<table>
-			<tr>
-				<th>Time</th>
-				<th>Printer</th>
-				<th>Error</th>
-				<th></th>
-			</tr>
+			<thead>
+				<tr>
+					<th>Time</th>
+					<th>Printer</th>
+					<th>Error</th>
+					<th></th>
+				</tr>
+			</thead>
 
 			<?php $i = 1; foreach($alerts as $alert) { ?>
 				<tr class="<?php echo ($i % 2 == 0)?"even ":""; ?><?php echo ($alert['status'] == 2)?"clear":""; ?>">
@@ -104,13 +159,13 @@ html;
 					<?php if($alert['status'] == 2) { ?>
 						Cleared
 					<?php } else { ?>
-						<a href="dme.php?clear=<?php echo $alert['id'];?>">Clear</a>
+						<a href="?clear=<?php echo $alert['id'];?>">Clear</a>
 					<?php } ?>
 
 					<?php if($alert['status'] == 1) { ?>
 						&nbsp;&nbsp;Assigned
 					<?php } else if($alert['status'] == 0){ ?>
-						&nbsp;&nbsp;<a href="dme.php?assign=<?php echo $alert['id'];?>">Assign</a>
+						&nbsp;&nbsp;<a href="?assign=<?php echo $alert['id'];?>">Assign</a>
 					<?php } ?>
 				</tr>
 			<?php $i++; } ?>
