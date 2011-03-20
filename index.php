@@ -11,26 +11,18 @@ define('DME', true);
 //Connect to DB.
 require_once('common.php');
 
-if(isset($_GET['clear']))
+if(isset($_POST['clear']))
 {
-	$query = $dbh -> prepare('UPDATE dme_messages SET status=2 WHERE id=?');
-	$query -> execute (array($_GET['clear']));
+	$query = $dbh -> prepare('UPDATE dme_messages SET status=2, clearedby=?, clearedtime=? WHERE status!=2');
+	$query -> execute (array('SCO', time()));
 	header("Location: index.php");
 }
 
-if(isset($_GET['assign']))
+if(isset($_POST['assign']))
 {
-	$query = $dbh -> prepare('UPDATE dme_messages SET status=1 WHERE id=? AND status = 0');
-	$query -> execute (array($_GET['assign']));
-
-	if($query -> rowCount > 0)
-	{
-		header("Location: index.php?count={$query -> rowCount}");
-	}
-	else
-	{
-		header("Location: index.php?error=Already%20Assigned&count={$query -> rowCount}");
-	}
+	$query = $dbh -> prepare('UPDATE dme_messages SET status=1, clearedby=?, clearedtime=? WHERE status=0');
+	$query -> execute(array('SCO', time()));
+	header("Location: index.php");
 }
 
 $query = $dbh -> prepare('SELECT * FROM dme_messages ORDER BY status ASC, time DESC');
@@ -138,6 +130,11 @@ html;
 			?>
 		</table>
 
+		<form method="post">
+			<input type="submit" name="assign" value="I'm On My Way" />
+			<input type="submit" name="clear" value="Dealt With" />
+		</form>
+		
 		<h2>Log</h2>
 		
 		<table>
@@ -146,7 +143,7 @@ html;
 					<th>Time</th>
 					<th>Printer</th>
 					<th>Error</th>
-					<th></th>
+					<th>Status</th>
 				</tr>
 			</thead>
 
@@ -156,17 +153,21 @@ html;
 					<td><?php echo str_replace('Copier_LIB_', '', $alert['printer']); ?></td>
 					<td><?php echo $alert['fault']; ?></td>
 					<td>
-					<?php if($alert['status'] == 2) { ?>
-						Cleared
-					<?php } else { ?>
-						<a href="?clear=<?php echo $alert['id'];?>">Clear</a>
-					<?php } ?>
-
-					<?php if($alert['status'] == 1) { ?>
-						&nbsp;&nbsp;Assigned
-					<?php } else if($alert['status'] == 0){ ?>
-						&nbsp;&nbsp;<a href="?assign=<?php echo $alert['id'];?>">Assign</a>
-					<?php } ?>
+						<?php
+						switch($alert['status'])
+						{
+							case 0:
+								echo "Outstanding";
+								break;
+							case 1:
+								echo "Assigned to {$alert['clearedby']} at " . date('H:i', $alert['clearedtime']);
+								break;
+							case 2:
+								echo "Cleared by {$alert['clearedby']} at " . date('H:i', $alert['clearedtime']);
+								break;
+						}
+						?>
+					</td>
 				</tr>
 			<?php $i++; } ?>
 		</table>
