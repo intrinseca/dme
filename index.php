@@ -1,11 +1,15 @@
 <?php
 
-$dsn = 'mysql:dbname=fitzscos;host=127.0.0.1';
-$user = 'fitzscos';
-$password = 'Eitaeyae';
+/**
+	* Index.php
+	*	Main page
+	*/
 
-$dbh = new PDO($dsn, $user, $password);
-$dbh -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+//Register as entry point
+define('DME', true);
+	
+//Connect to DB.
+require_once('common.php');
 
 if(isset($_GET['clear']))
 {
@@ -29,33 +33,15 @@ if(isset($_GET['assign']))
 	}
 }
 
-if(isset($_POST['message']))
-{
-	$message = $_POST['message'];
+$query = $dbh -> prepare('SELECT * FROM dme_messages ORDER BY status ASC, time DESC');
+$query -> execute();
+$alerts = $query -> fetchAll();
 
-	preg_match('/^Date: (.*)/m', $message, $matches);
-	$date = strtotime($matches[1]);	
+$printers = array('Copier_LIB_BMT', 'Copier_LIB_1ST', 'Copier_LIB_2ND');
 
-	preg_match('/^Printer: (.*)/m', $message, $matches);
-	$printer = $matches[1];
-
-	preg_match('/^Fault: (.*)/m', $message, $matches);
-	$fault = $matches[1];
-
-	$query = $dbh -> prepare('INSERT INTO dme_messages(time,printer,fault) VALUES(?,?,?)'); 
-	$query -> execute(array($date, $printer, $fault));
-}
-else
-{
-	$query = $dbh -> prepare('SELECT * FROM dme_messages ORDER BY status ASC, time DESC');
-	$query -> execute();
-	$alerts = $query -> fetchAll();
-
-	$printers = array('Copier_LIB_BMT', 'Copier_LIB_1ST', 'Copier_LIB_2ND');
-
-	$query = $dbh -> prepare('SELECT printer, MIN(status) AS status FROM dme_messages GROUP BY printer');
-	$query -> execute();
-	$status = $query -> fetchAll();
+$query = $dbh -> prepare('SELECT printer, MIN(status) AS status FROM dme_messages GROUP BY printer');
+$query -> execute();
+$status = $query -> fetchAll();
 ?>
 
 <html>
@@ -133,4 +119,3 @@ html;
 </div>
 </body>
 </html>
-<?php } ?>
