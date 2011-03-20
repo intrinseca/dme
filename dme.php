@@ -54,7 +54,7 @@ else
 	$printers = array('Copier_LIB_BMT', 'Copier_LIB_1ST', 'Copier_LIB_2ND');
 
 	$query = $dbh -> prepare('SELECT printer, MIN(status) AS status FROM dme_messages GROUP BY printer');
-	$query -> execute(array($printers[0]));
+	$query -> execute();
 	$status = $query -> fetchAll();
 ?>
 
