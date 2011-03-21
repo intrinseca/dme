@@ -1,0 +1,11 @@
+Fitz SCO Printer Monitoring Page
+Originally by Michael Allan <mda39@cam.ac.uk>
+
+This script recieves forwarded emails from the printer monitoring system and logs them to a database, then provides the ability to mark the faults as:
+ * Assigned, i.e. an SCO is on their way to fix the problem. This prevents the issue of several of us turning up to the library.
+ * Cleared, i.e. the fault is resolved. This prevents the "the email came at 10am while I was at lectures, it's now 5pm so someone will have dealt with it".
+Both of these could be accomplished via the mailing list, but this would create a lot of email traffic and clearly provides to high a barrier to entry (or we'd do that already).
+
+DME Alert emails are forwarded to mda39's SRCF email, where a procmail script uses curl to post them to the PHP application. They are then mined for the useful information and stored in a MySQL database. A second database table has a list of all printers used to generate the status report.
+
+The webpage can then display the status of all the printers, and a list of the faults reported and when/if they were cleared.

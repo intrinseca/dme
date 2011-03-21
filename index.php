@@ -11,6 +11,9 @@ define('DME', true);
 //Connect to DB.
 require_once('common.php');
 
+//Clear all outstanding faults
+//TODO: Move to separate file
+//TODO: Add usernames
 if(isset($_POST['clear']))
 {
 	$query = $dbh -> prepare('UPDATE dme_messages SET status=2, clearedby=?, clearedtime=? WHERE status!=2');
@@ -18,6 +21,8 @@ if(isset($_POST['clear']))
 	header("Location: index.php");
 }
 
+//Assign all outstanding faults
+//TODO: Move to separate page
 if(isset($_POST['assign']))
 {
 	$query = $dbh -> prepare('UPDATE dme_messages SET status=1, clearedby=?, clearedtime=? WHERE status=0');
@@ -25,31 +30,33 @@ if(isset($_POST['assign']))
 	header("Location: index.php");
 }
 
-$query = $dbh -> prepare('SELECT * FROM dme_messages ORDER BY status ASC, time DESC');
-$query -> execute();
-$alerts = $query -> fetchAll();
-
-$printers = array('Copier_LIB_BMT', 'Copier_LIB_1ST', 'Copier_LIB_2ND');
-
+//Get status for printers
+//Complex query
 $query = $dbh -> prepare(<<<sql
 SELECT name, description, minstatus, faults
-FROM (
+FROM ( 													/* Sub-Query for fault data */
 	SELECT 
 		printer, 
-		MIN(status) AS minstatus, 
-		GROUP_CONCAT(
-			DISTINCT fault 
-			ORDER BY time DESC
+		MIN(status) AS minstatus, 	/* Lower fault status = not processed */
+		GROUP_CONCAT(								/* Gets a comma separated list of outstanding faults */
+			DISTINCT fault 						/* No repeats
+			ORDER BY time DESC				/* Sort faults by report time */
 			SEPARATOR ", "
 			) AS faults
 	FROM dme_messages
-	WHERE status!=2
-	GROUP BY printer) AS statustable
-RIGHT JOIN dme_printers ON statustable.printer=name
+	WHERE status!=2 							/* Show only outstanding faults*/
+	GROUP BY printer							/* One row per printer with outstanding faults */
+	) AS statustable
+RIGHT JOIN dme_printers ON statustable.printer=name	/* Join creates a row even for printers with no outstanding faults, with minstatus=NULL */
 sql
 );
 $query -> execute();
 $status = $query -> fetchAll();
+
+//Get the full fault log
+$query = $dbh -> prepare('SELECT * FROM dme_messages ORDER BY status ASC, time DESC');
+$query -> execute();
+$log = $query -> fetchAll();
 ?>
 
 <html>
@@ -71,21 +78,14 @@ $status = $query -> fetchAll();
 
 	<div id="content">
 
-		<?php 
-			if(isset($_GET['error']))
-			{
-				echo <<<html
-<div class="error"><div><b>Error:</b> {$_GET['error']}</div></div>
-html;
-			}
-		?>
-
 		<h2>Status</h2>
 		
 		<table id="status">
 			<?php
+				//Generate status table, one row per printer
 				foreach($status as $printer)
 				{
+					//Null status means no outstanding faults, see query above.
 					if(is_null($printer['minstatus']))
 					{
 						$faultDesc = "Online";
@@ -95,6 +95,7 @@ html;
 					{
 						$faultDesc = "Offline: " . $printer['faults'];
 						
+						//Select icon based on the first (newest) fault in the list
 						$faultLength = strpos($printer['faults'], ',');
 						if($faultLength === false)
 							$faultLength = strlen($printer['faults']);
@@ -147,31 +148,41 @@ html;
 				</tr>
 			</thead>
 
-			<?php $i = 1; foreach($alerts as $alert) { ?>
-				<tr class="<?php echo ($i % 2 == 0)?"even ":""; ?><?php echo ($alert['status'] == 2)?"clear":""; ?>">
-					<td><?php echo date('d/m/y H:i', $alert['time']); ?></td>
-					<td><?php echo str_replace('Copier_LIB_', '', $alert['printer']); ?></td>
-					<td><?php echo $alert['fault']; ?></td>
+			<?php 
+				//Index used for odd/even row striping
+				$i = 1;
+				//Generate log table
+				foreach($log as $entry) 
+				{ 
+			?>
+				<tr class="<?php echo ($i % 2 == 0)?"even ":""; ?><?php echo ($entry['status'] == 2)?"clear":""; ?>">
+					<td><?php echo date('d/m/y H:i', $entry['time']); ?></td>
+					<td><?php echo str_replace('Copier_LIB_', '', $entry['printer']); ?></td>
+					<td><?php echo $entry['fault']; ?></td>
 					<td>
 						<?php
-						switch($alert['status'])
+						switch($entry['status'])
 						{
 							case 0:
 								echo "Outstanding";
 								break;
 							case 1:
-								echo "Assigned to {$alert['clearedby']} at " . date('H:i', $alert['clearedtime']);
+								echo "Assigned to {$entry['clearedby']} at " . date('H:i', $entry['clearedtime']);
 								break;
 							case 2:
-								echo "Cleared by {$alert['clearedby']} at " . date('H:i', $alert['clearedtime']);
+								echo "Cleared by {$entry['clearedby']} at " . date('H:i', $entry['clearedtime']);
 								break;
 						}
 						?>
 					</td>
 				</tr>
-			<?php $i++; } ?>
+			<?php 
+					$i++; 
+				} 
+			?>
 		</table>
 	</div>
 </div>
+
 </body>
 </html>
