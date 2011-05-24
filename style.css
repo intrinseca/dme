@@ -2,7 +2,7 @@ body
 {
   font-family: calibri;
   background: url('images/bk.png') repeat-x #E7E7E9;
-  font-size: 10pt;
+  font-size: 12pt;
 	padding: 0;
 	margin: 0;
 }
@@ -112,20 +112,27 @@ a.activeSort
   width: 100%;
   border-collapse: collapse;
 	margin-top: 5px;
+	font-size: 11pt;
 }
 
 #content table td
 {
 	padding: 0.5em;
+  font-size: 1em;
 }
 
 #content table th
 {
   font-family: corbel, sans-serif;
-  font-size: 1em;
+  font-size: 1.2em;
   font-weight: bold;
   text-align: left;
   padding-left: 0.25em;
+}
+
+#content table th.statusHeader
+{
+	width: 120px;
 }
 
 #content table thead th
@@ -138,19 +145,45 @@ a.activeSort
 	background: #ddd;
 }
 
-#content table tr.clear td
+#log tr.clear td
 {
 	text-decoration: line-through;
 }
 
-#content #status
+#status tr.fault
 {
-	width: auto;
+	background: #FCCFCF;
+	border: 1px solid #770D28;
+}
+
+#content table tr.online
+{
+	border: 1px solid transparent;
+	background: #DEFAE8;
+}
+
+#status td.assignment
+{
+	text-align: right;
 }
 
 #status td img
 {
 	vertical-align: text-top;
+}
+
+#error
+{
+	background: #FCCFCF;
+	border: 1px solid #770D28;
+	padding: 0.5em;
+}
+
+#assigned
+{
+	background: #D0D0F2;
+	border: 1px solid blue;
+	padding: 0.5em;
 }
 
 #footer

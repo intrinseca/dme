@@ -13,31 +13,48 @@ require_once('common.php');
 
 //Clear all outstanding faults
 //TODO: Move to separate file
-//TODO: Add usernames
 if(isset($_POST['clear']))
 {
-	$query = $dbh -> prepare('UPDATE dme_messages SET status=2, clearedby=?, clearedtime=? WHERE status!=2');
-	$query -> execute (array('SCO', time()));
-	header("Location: index.php");
+	if(isset($_POST['clearedby']) and $_POST['clearedby'] != "")
+	{
+		$query = $dbh -> prepare('UPDATE dme_messages SET status=2, clearedby=?, clearedtime=? WHERE status!=2');
+		$query -> execute (array($_POST['clearedby'], time()));
+		header("Location: index.php");
+	}
+	else
+	{
+		header("Location: index.php?error=Enter%20a%20name.");
+	}
 }
 
 //Assign all outstanding faults
 //TODO: Move to separate page
 if(isset($_POST['assign']))
 {
-	$query = $dbh -> prepare('UPDATE dme_messages SET status=1, clearedby=?, clearedtime=? WHERE status=0');
-	$query -> execute(array('SCO', time()));
-	header("Location: index.php");
+	if(isset($_POST['clearedby']) and $_POST['clearedby'] != "")
+	{
+		$query = $dbh -> prepare('UPDATE dme_messages SET status=1, clearedby=?, clearedtime=? WHERE status=0');
+		$query -> execute(array($_POST['clearedby'], time()));
+		header("Location: index.php?assignedto={$_POST['clearedby']}");
+	}
+	else
+	{
+		header("Location: index.php?error=Enter%20a%20name.");
+	}
 }
 
 //Get status for printers
 //Complex query
 $query = $dbh -> prepare(<<<sql
-SELECT name, description, minstatus, faults
+SELECT name, description, attendees, minstatus, faults
 FROM ( 													/* Sub-Query for fault data */
 	SELECT 
-		printer, 
+		printer,
 		MIN(status) AS minstatus, 	/* Lower fault status = not processed */
+		GROUP_CONCAT(
+			DISTINCT clearedby
+			ORDER BY time ASC
+			) AS attendees,
 		GROUP_CONCAT(								/* Gets a comma separated list of outstanding faults */
 			DISTINCT fault 						/* No repeats
 			ORDER BY time DESC				/* Sort faults by report time */
@@ -52,6 +69,31 @@ sql
 );
 $query -> execute();
 $status = $query -> fetchAll();
+
+//Sanitise any error message
+if(isset($_GET['error']))
+{
+	$error = htmlentities($_GET['error']);
+}
+else
+{
+	$error = "";
+}
+
+//Get the count of faults assigned to you
+if(isset($_GET['assignedto']))
+{
+	$showAssigned = true;	//Show the assigned faults line.
+	$name = htmlentities($_GET['assignedto']);
+	$query = $dbh -> prepare('SELECT COUNT(*) FROM dme_messages WHERE clearedby=? AND status=1');
+	$query -> execute(array($_GET['assignedto']));
+	$numberAssigned = $query -> fetchColumn();
+}
+else
+{
+	$name = "";
+	$showAssigned = false;
+}
 
 //Get the full fault log
 $query = $dbh -> prepare('SELECT * FROM dme_messages ORDER BY status ASC, time DESC');
@@ -90,10 +132,13 @@ $log = $query -> fetchAll();
 					{
 						$faultDesc = "Online";
 						$image = "printer.png";
+						$class = ' class="online"';
+						$assignment = '';
 					}
 					else
 					{
 						$faultDesc = "Offline: " . $printer['faults'];
+						$class = ' class="fault"';
 						
 						//Select icon based on the first (newest) fault in the list
 						$faultLength = strpos($printer['faults'], ',');
@@ -115,30 +160,60 @@ $log = $query -> fetchAll();
 								$image = "printer_error.png";
 								break;
 						}
+						
+						$attendees = explode(',', $printer['attendees']);
+						$assignment = (count($attendees > 0) && $attendees[0] != "")?"{$attendees[0]} is on their way.":"";
 					}			
 					
 					echo <<<html
-<tr>
-	<th>
+<tr{$class}>
+	<th class="statusHeader">
 		{$printer['description']}
 	</th>
 	<td>
 		<img src="images/{$image}" /> {$faultDesc}
+	</td>
+	<td class="assignment">
+		{$assignment}
 	</td>
 </tr>
 html;
 				}
 			?>
 		</table>
-
-		<form method="post">
-			<input type="submit" name="assign" value="I'm On My Way" />
-			<input type="submit" name="clear" value="Dealt With" />
+		
+		<h2>Clearing</h2>
+		<?php
+			if($error != "")
+			{
+				echo <<<html
+<p id="error"><b>Error:</b> {$error}
+html;
+			}
+		?>
+		<?php
+			if($showAssigned)
+			{
+				echo <<<html
+<p id="assigned">{$numberAssigned} faults assigned to {$name}.</p>
+html;
+			}
+		?>
+		
+		<form method="post" id="clearing">
+			<p>
+				<b>crsID:</b>
+				<input type="text" name="clearedby" value="<?php echo $name; ?>" />
+			</p>
+			<p>
+				<input type="submit" name="assign" value="Assign all Outstanding Faults to Me" />
+				<input type="submit" name="clear" value="Mark all Outstanding Faults as Clear" />
+			</p>
 		</form>
 		
 		<h2>Log</h2>
 		
-		<table>
+		<table id="log">
 			<thead>
 				<tr>
 					<th>Time</th>
