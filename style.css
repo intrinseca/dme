@@ -153,12 +153,10 @@ a.activeSort
 #status tr.fault
 {
 	background: #FCCFCF;
-	border: 1px solid #770D28;
 }
 
 #content table tr.online
 {
-	border: 1px solid transparent;
 	background: #DEFAE8;
 }
 
