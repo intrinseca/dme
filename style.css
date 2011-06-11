@@ -1,15 +1,15 @@
 body
 {
-  font-family: calibri;
+  font-family: Droid Sans, Calibri, Tahoma, sans-serif;
   background: url('images/bk.png') repeat-x #E7E7E9;
-  font-size: 12pt;
+  font-size: 10pt;
 	padding: 0;
 	margin: 0;
 }
 
 h1, h2
 {
-  font-family: perpetua, serif;
+  font-family: Quattrocento, Perpetua, Palatino Linotype, Palatino, serif;
   text-transform: uppercase;
   font-weight: normal;
 	margin-bottom: 0.1em;
@@ -35,29 +35,27 @@ a img
   border: 0;
 }
 
-td
+td, th, table
 {
-  font-size: 10.2pt;
+  font-size: 10pt;
 }
 
 #container
 {
   max-width: 890px;
-	width:100%;
   margin: 10px auto;
   background-color: #fff;
 }
 
-#logo
-{
-  float: left;
-  margin-right: 10px;
-  vertical-align: middle;
-}
-
 #header
 {
-	padding: 10px;
+  min-height: 20px;
+  background-image: url('images/fitz-crest.png');
+  background-position: 0 50%;
+  background-repeat: no-repeat;
+  padding: 10px;
+  padding-left: 40px;
+  margin: 10px;
 }
 
 #header h1
@@ -103,8 +101,13 @@ a.activeSort
 
 #content
 {
-	margin: 10px;
-	padding: 10px 0;
+  margin: 10px;
+  margin-top: 15px;
+}
+
+#content > h2:first-child
+{
+  margin-top: 0;
 }
 
 #content table
@@ -112,13 +115,11 @@ a.activeSort
   width: 100%;
   border-collapse: collapse;
 	margin-top: 5px;
-	font-size: 11pt;
 }
 
 #content table td
 {
-	padding: 0.5em;
-  font-size: 1em;
+	padding: 5px;
 }
 
 #content table th
@@ -128,11 +129,6 @@ a.activeSort
   font-weight: bold;
   text-align: left;
   padding-left: 0.25em;
-}
-
-#content table th.statusHeader
-{
-	width: 120px;
 }
 
 #content table thead th
@@ -160,14 +156,24 @@ a.activeSort
 	background: #DEFAE8;
 }
 
-#status td.assignment
-{
-	text-align: right;
-}
-
 #status td img
 {
-	vertical-align: text-top;
+	vertical-align: text-bottom;
+}
+
+#content table th.statusHeader
+{
+	padding: 6px 5px 1px 5px;
+}
+
+#content table td.statusRow
+{
+	width: 100%;
+}
+
+.statusAssignment
+{
+  float: right;
 }
 
 #error
@@ -182,6 +188,11 @@ a.activeSort
 	background: #D0D0F2;
 	border: 1px solid blue;
 	padding: 0.5em;
+}
+
+#content form table
+{
+  width: auto;
 }
 
 #footer

@@ -1,0 +1,56 @@
+#container
+{
+  width: 100%;
+  overflow: hidden;
+  margin-top: 0;
+}
+
+#header
+{
+  text-align: center;
+}
+
+h1, h2
+{
+  font-size: 2em;
+  text-align: center;
+}
+
+#content table th.statusHeader
+{
+	width: auto;
+}
+
+#content form table
+{
+  width: 100%;
+}
+
+#content form table td
+{
+  padding: 0;
+}
+
+#content form p
+{
+  width: 100%;
+  text-align: center;
+  margin: 0;
+}
+
+#content form input
+{
+  width: 100%;
+  margin: 5px 0;
+  height: 1.8em;
+  font-size: 1.2em;
+}
+
+#content form input[type=submit]
+{
+  text-align: center;
+}
+
+#content form input[type=text]
+{
+}

@@ -103,17 +103,23 @@ $log = $query -> fetchAll();
 
 <html>
 <head>
-	<title>Fitz SCO Printer Monitoring</title>
-	<link rel="stylesheet" href="style.css" />
-  <meta name="viewport" content="width=320" />
-	<link rel="shortcut icon" href="images/favicon.png" />
+  <title>Fitz SCO Printer Monitoring</title>
+
+  <link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+  <link rel="stylesheet" type="text/css" href="mobile.css" media="screen and (max-width: 480px)" />
+  
+  <meta name="viewport" content="width=device-width; initial-scale=1.0">
+
+  <link rel="shortcut icon" href="images/favicon.png" />
+
+  <link href='http://fonts.googleapis.com/css?family=Droid+Sans' rel='stylesheet' type='text/css'>
+  <link  href="http://fonts.googleapis.com/css?family=Quattrocento:regular" rel="stylesheet" type="text/css" >
 </head>
 <body>
 
 <div id="container">
 	<div id="header">
 		<h1>
-			<img src="images/fitz-crest.png" id="logo" />
 			Fitz SCO Printer Monitoring
 		</h1>
 	</div>
@@ -170,11 +176,10 @@ $log = $query -> fetchAll();
 	<th class="statusHeader">
 		{$printer['description']}
 	</th>
-	<td>
-		<img src="images/{$image}" /> {$faultDesc}
-	</td>
-	<td class="assignment">
-		{$assignment}
+	<td class="statusRow">
+		<img src="images/{$image}" class="statusIcon" />
+    {$faultDesc}
+		<div class="statusAssignment">{$assignment}</div>
 	</td>
 </tr>
 html;
@@ -201,15 +206,17 @@ html;
 		?>
 		
 		<form method="post" id="clearing">
-            <input type="hidden" name="clearbefore" value="<?php echo time(); ?>" />
-			<p>
-				<b>crsID:</b>
-				<input type="text" name="clearedby" value="<?php echo $name; ?>" />
-			</p>
-			<p>
-				<input type="submit" name="assign" value="Assign all Outstanding Faults to Me" />
-				<input type="submit" name="clear" value="Mark all Outstanding Faults as Clear" />
-			</p>
+      <input type="hidden" name="clearbefore" value="<?php echo time(); ?>" />
+			<table>
+        <tr>
+				  <th>crsID:</th>
+				  <td><input type="text" name="clearedby" value="<?php echo $name; ?>" /></td>
+			  </tr>
+      </table>
+      <p>
+		    <input type="submit" name="assign" value="Assign all Outstanding Faults to Me" />
+		    <input type="submit" name="clear" value="Mark all Outstanding Faults as Clear" />
+      </p>
 		</form>
 		
 		<h2>Log</h2>
