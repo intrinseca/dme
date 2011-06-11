@@ -12,9 +12,7 @@ if(!defined('DME'))
 }
 
 //DB parameters
-$dsn = 'mysql:dbname=fitzscos;host=127.0.0.1';
-$user = 'fitzscos';
-$password = 'Eitaeyae';
+include('settings.php');
 
 //Connect to DB
 $dbh = new PDO($dsn, $user, $password);

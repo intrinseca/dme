@@ -17,9 +17,9 @@ if(isset($_POST['clear']))
 {
 	if(isset($_POST['clearedby']) and $_POST['clearedby'] != "")
 	{
-		$query = $dbh -> prepare('UPDATE dme_messages SET status=2, clearedby=?, clearedtime=? WHERE status!=2');
-		$query -> execute (array($_POST['clearedby'], time()));
-		header("Location: index.php");
+		$query = $dbh -> prepare('UPDATE dme_messages SET status=2, clearedby=?, clearedtime=? WHERE status!=2 AND (time <=? AND clearedtime <=?)');
+		$query -> execute (array($_POST['clearedby'], time(), $_POST['clearbefore'], $_POST['clearbefore']));
+		header("Location: index.php?assignedto={$_POST['clearedby']}");
 	}
 	else
 	{
@@ -33,8 +33,8 @@ if(isset($_POST['assign']))
 {
 	if(isset($_POST['clearedby']) and $_POST['clearedby'] != "")
 	{
-		$query = $dbh -> prepare('UPDATE dme_messages SET status=1, clearedby=?, clearedtime=? WHERE status=0');
-		$query -> execute(array($_POST['clearedby'], time()));
+		$query = $dbh -> prepare('UPDATE dme_messages SET status=1, clearedby=?, clearedtime=? WHERE status!=2 AND (time <=? AND clearedtime <=?)');
+		$query -> execute (array($_POST['clearedby'], time(), $_POST['clearbefore'], $_POST['clearbefore']));
 		header("Location: index.php?assignedto={$_POST['clearedby']}");
 	}
 	else
@@ -201,6 +201,7 @@ html;
 		?>
 		
 		<form method="post" id="clearing">
+            <input type="hidden" name="clearbefore" value="<?php echo time(); ?>" />
 			<p>
 				<b>crsID:</b>
 				<input type="text" name="clearedby" value="<?php echo $name; ?>" />
